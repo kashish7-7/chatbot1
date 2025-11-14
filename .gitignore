@@ -1,0 +1,23 @@
+# Ignore environment variables
+.env
+backend/.env
+frontend/.env
+
+# Ignore virtual environments
+venv/
+.venv/
+backend/venv/
+backend/.venv/
+frontend/venv/
+frontend/.venv/
+
+# Ignore pycache
+__pycache__/
+backend/__pycache__/
+frontend/__pycache__/
+
+# Ignore log files
+*.log
+
+# Ignore VSCode settings
+.vscode/
