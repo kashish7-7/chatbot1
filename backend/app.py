@@ -3,12 +3,15 @@ from pathlib import Path
 from typing import List, Dict
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from groq import Groq
 from fastapi.middleware.cors import CORSMiddleware
 
+# Load environment variables
 BASE_DIR = Path(__file__).resolve().parent
-ENV_PATH = BASE_DIR.parent / '.env'
+ENV_PATH = BASE_DIR / '.env'
 
 print(f"Looking for .env at: {ENV_PATH}")
 print(f".env exists: {ENV_PATH.exists()}")
@@ -24,6 +27,7 @@ if not GROQ_API_KEY:
 
 app = FastAPI()
 
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,6 +35,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 client = Groq(api_key=GROQ_API_KEY)
 
@@ -53,12 +60,12 @@ def ask_question(data: Query):
 
 @app.get("/")
 def home():
-    return {"message": "Send POST request to /ask or /chat"}
+    return FileResponse("static/index.html")
 
 class UserInput(BaseModel):
     message: str
     role: str = "user"
-    conversation_id: str
+    conversation_id: str = "default"
 
 class Conversation:
     def __init__(self):
@@ -77,12 +84,9 @@ def query_groq_api(conversation: Conversation) -> str:
             temperature=1,
             max_tokens=1024,
             top_p=1,
-            stream=True,
+            stream=False,
         )
-        response = ""
-        for chunk in completion:
-            response += chunk.choices[0].delta.content or ""
-        return response
+        return completion.choices[0].message.content
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Groq Error: {str(e)}")
 
@@ -115,7 +119,3 @@ async def chat(input: UserInput):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -15,3 +15,12 @@ from app import app as fastapi_app
 # Convert ASGI → WSGI for PythonAnywhere
 from mangum import Mangum
 handler = Mangum(fastapi_app)
+
+import sys
+import os
+
+path = '/home/kashish77/C:\Users\Kashish\OneDrive\Desktop\AndAi\chatbot>'
+if path not in sys.path:
+    sys.path.append(path)
+
+from main import app as application
