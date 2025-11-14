@@ -6,3 +6,9 @@ langchain_community
 langchain-core
 langchain-groq
 groq
+fastapi
+uvicorn
+groq
+python-dotenv
+mangum
+pydantic
